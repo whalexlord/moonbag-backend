@@ -1,51 +1,32 @@
-import { Alchemy, Network, TokenBalance } from "alchemy-sdk";
+import Moralis from "moralis";
 import dotConfig from "dotenv";
 
 dotConfig.config();
-const apiKey = process.env.ALCHEMY_API_KEY;
+const apiKey = process.env.MORALIS_API_KEY;
 
 const config = {
   apiKey,
-  network: Network.ETH_MAINNET,
 };
 
-// initalize alchemy instance for alchemy eth
-const alchemy = new Alchemy(config);
+// clone instance for moralis solana and start solana server.
+Moralis.start(config);
 
-// parameter
-// @owner address to fetch tokens lists on-hand
-export const getTokenList = async (owner: string) => {
-  // Get token balances
-  const balances = await alchemy.core.getTokenBalances(owner);
-  console.log(balances);
-  // Remove balances with zero balance
-  const nonZeroBalances = balances.tokenBalances.filter(
-    (item: TokenBalance) => item.tokenBalance !== "0"
-  );
+export const getSplTokenList = async (address: string) => {
+  const response = await Moralis.SolApi.account.getBalance({
+    network: "mainnet",
+    address,
+  });
 
-  // initalize list for tokens on owner address.
-  const tokenList = [];
-  let i = 0;
+  const sol_data = response.raw;
 
-  // loop through all tokens in non-zero Tokens
-  for (i = 0; i < nonZeroBalances.length; i++) {
-    const token: TokenBalance = nonZeroBalances[i];
-    // Get balance for current token in non-zero balance list.
-    let balance = parseFloat(token.tokenBalance as string);
+  const response_spl = await Moralis.SolApi.account.getSPL({
+    network: "mainnet",
+    address,
+  });
 
-    // Get meta data for current token
-    const metaData = await alchemy.core.getTokenMetadata(token.contractAddress);
+  const spl_data = response_spl.raw;
 
-    // Compute token balance in user friendly format
-    // balance /= Math.pow(10, metaData.decimals as number);
-    balance = parseFloat(balance.toFixed(3));
-
-    tokenList.push({
-      ...metaData,
-      balance: token.tokenBalance,
-      address: token.contractAddress,
-    });
-  }
+  const tokenList = [sol_data, spl_data];
 
   return tokenList;
 };
