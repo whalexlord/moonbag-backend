@@ -26,7 +26,8 @@ export const getSplTokenList = async (address: string) => {
 
   const spl_data = response_spl.raw;
 
-  const tokenList = [sol_data, spl_data];
+  const tokenList = [sol_data, ...spl_data];
+  console.log(tokenList);
 
   return tokenList;
 };

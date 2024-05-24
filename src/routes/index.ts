@@ -1,6 +1,6 @@
 import { Express } from "express";
-import { getTokenList } from "../controller/evm_controller";
-import { getSplTokenList } from "../controller/sol_controller";
+import { getTokenList } from "../controller/evmController";
+import { getSplTokenList } from "../controller/solController";
 
 module.exports = (app: Express) => {
   app.use("/start", (req, res) => {
