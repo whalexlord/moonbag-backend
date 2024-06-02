@@ -1,5 +1,7 @@
 import { Alchemy, Network, TokenBalance } from "alchemy-sdk";
+import Moralis from "moralis";
 import dotConfig from "dotenv";
+const { EvmChain } = require("@moralisweb3/common-evm-utils");
 
 dotConfig.config();
 const apiKey = process.env.ALCHEMY_API_KEY;
@@ -48,4 +50,21 @@ export const getTokenList = async (owner: string) => {
   }
 
   return tokenList;
+};
+
+export const getTokenPrice = async (address: string) => {
+  try {
+    const response = await Moralis.EvmApi.token.getTokenPrice({
+      chain: EvmChain,
+      address,
+    });
+
+    const price = response.raw;
+
+    console.log(price);
+
+    return price;
+  } catch (error) {
+    return {error: "Unregistered token address"};
+  }
 };
