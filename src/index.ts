@@ -1,6 +1,7 @@
 import express, { Express } from "express";
 import dotConfig from "dotenv";
 import bodyParser from "body-parser";
+import { runServer } from "./const";
 
 dotConfig.config();
 
@@ -9,6 +10,8 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+
+runServer();
 
 app.use((req, res, next) => {
   // Website you wish to allow to connect
