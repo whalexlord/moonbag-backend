@@ -18,10 +18,10 @@ module.exports = (app: Express) => {
 
       switch (chain?.toString().toLowerCase()) {
         case "sol" || "solana":
-          res.send(await getSplTokenList(owner as string));
+          res.status(200).json(await getSplTokenList(owner as string));
           break;
         case "eth" || "ethereum":
-          res.send(await getTokenList(owner as string));
+          res.status(200).json(await getTokenList(owner as string));
           break;
         default:
           res.send("Invalid chain");
@@ -40,11 +40,11 @@ module.exports = (app: Express) => {
       switch (chain?.toString().toLowerCase()) {
         case "sol" || "solana":
           console.log("fetching spl token price");
-          res.send(await getSplTokenPrice(tokenAddress as string));
+          res.status(200).json(await getSplTokenPrice(tokenAddress as string));
           break;
         case "eth" || "ethereum":
           console.log("fetching token price on EVM");
-          res.send(await getTokenPrice(tokenAddress as string));
+          res.status(200).json(await getTokenPrice(tokenAddress as string));
           break;
         default:
           res.send("Invalid chain");
