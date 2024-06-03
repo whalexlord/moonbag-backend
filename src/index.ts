@@ -6,7 +6,7 @@ import { runServer } from "./const";
 dotConfig.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5001;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
