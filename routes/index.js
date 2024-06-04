@@ -6,7 +6,7 @@ const {
   getSplTokenList,
   getSplTokenPrice,
 } = require('../controller/solController.js');
-const { runServer } = require('../const.ts');
+const { runServer } = require('../const.js');
 
 runServer();
 
