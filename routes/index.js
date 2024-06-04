@@ -1,11 +1,11 @@
 const {
   getTokenList,
   getTokenPrice,
-} = require('../controller/evmController');
+} = require('../controller/evmController.js');
 const {
   getSplTokenList,
   getSplTokenPrice,
-} = require('../controller/solController');
+} = require('../controller/solController.js');
 const { runServer } = require('../const.ts');
 
 runServer();
