@@ -25,7 +25,7 @@ export const getSplTokenList = async (address: string) => {
 //@address spl token address
 //get spl token price
 
-export const getTokenPrice = async (address: string) => {
+export const getSplTokenPrice = async (address: string) => {
   console.log("fetching spl token price");
 
   try {
