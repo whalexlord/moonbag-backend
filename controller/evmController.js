@@ -1,6 +1,9 @@
-import { Alchemy, Network, TokenBalance } from "alchemy-sdk";
-import Moralis from "moralis";
-import dotConfig from "dotenv";
+const Alchemy = require("alchemy-sdk").Alchemy;
+const Network = require("alchemy-sdk").Network;
+
+const Moralis = require("moralis").default;
+const dotConfig = require("dotenv");
+
 const { EvmChain } = require("@moralisweb3/common-evm-utils");
 
 dotConfig.config();
@@ -16,13 +19,13 @@ const alchemy = new Alchemy(config);
 
 // parameter
 // @owner address to fetch tokens lists on-hand
-export const getTokenList = async (owner: string) => {
+const getTokenList = async (owner) => {
   // Get token balances
   const balances = await alchemy.core.getTokenBalances(owner);
   console.log(balances);
   // Remove balances with zero balance
   const nonZeroBalances = balances.tokenBalances.filter(
-    (item: TokenBalance) => item.tokenBalance !== "0"
+    (item) => item.tokenBalance !== "0"
   );
 
   // initalize list for tokens on owner address.
@@ -30,10 +33,10 @@ export const getTokenList = async (owner: string) => {
   let i = 0;
 
   // loop through all tokens in non-zero Tokens
-  for (i = 0; i < nonZeroBalances.length; i++) {
-    const token: TokenBalance = nonZeroBalances[i];
+  for (i = 0; i < nonZeroBalances.length; i ++) {
+    const token = nonZeroBalances[i];
     // Get balance for current token in non-zero balance list.
-    let balance = parseFloat(token.tokenBalance as string);
+    let balance = parseFloat(token.tokenBalance);
 
     // Get meta data for current token
     const metaData = await alchemy.core.getTokenMetadata(token.contractAddress);
@@ -52,7 +55,7 @@ export const getTokenList = async (owner: string) => {
   return tokenList;
 };
 
-export const getTokenPrice = async (address: string) => {
+const getTokenPrice = async (address) => {
   try {
     const response = await Moralis.EvmApi.token.getTokenPrice({
       chain: EvmChain,
@@ -68,3 +71,8 @@ export const getTokenPrice = async (address: string) => {
     return {error: "Unregistered token address"};
   }
 };
+
+module.exports = {
+  getTokenList,
+  getTokenPrice
+}
