@@ -4,6 +4,9 @@ import {
   getSplTokenList,
   getTokenPrice as getSplTokenPrice,
 } from "../controller/SOLController";
+import { runServer } from "../const";
+
+runServer();
 
 module.exports = (app: Express) => {
   app.use("/start", (req, res) => {

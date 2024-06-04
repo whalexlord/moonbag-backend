@@ -42,7 +42,7 @@ export const getTokenPrice = async (address: string) => {
 
         console.log(price);
 
-        return { price };
+        return { price : price.usdPrice};
       } catch (error) {
         return { error: "Unregistered spl token address" }
       }
