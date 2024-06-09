@@ -5,6 +5,7 @@ const {
 const {
   getSplTokenList,
   getSplTokenPrice,
+  createTradeInstruction,
 } = require('../controller/solController.js');
 const { runServer } = require('../const.js');
 
@@ -55,6 +56,30 @@ module.exports = (app) => {
           res.send('Invalid chain');
       }
     } catch (error) {
+      res.send(error);
+    }
+  });
+
+  app.get('/createTradeSPL', async (req, res) => {
+    try {
+      const mint = req.query.mint;
+      const amount = req.query.amount || 1000;
+      const slippage = req.query.slippage || 2;
+      const priorityFee = req.query.priorityFee || 0.002;
+      const userPublicKey = req.query.userPublicKey;
+      const pf = req.query.pf;
+      console.log(mint, amount, slippage, priorityFee, userPublicKey, pf);
+      const tx = await createTradeInstruction(
+        mint,
+        amount,
+        userPublicKey,
+        slippage,
+        priorityFee,
+        pf
+      );
+      res.send(tx);
+    } catch (err) {
+      console.error(error);
       res.send(error);
     }
   });

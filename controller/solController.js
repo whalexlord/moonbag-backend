@@ -1,5 +1,11 @@
 const Moralis = require('moralis').default;
 const axios = require('axios');
+const { VersionedTransaction, LAMPORTS_PER_SOL } = require('@solana/web3.js');
+const bs58 = require('bs58');
+const fetch = require('cross-fetch');
+
+const url = 'https://pumpportal.fun/api/trade-local';
+const pfEndpoint = 'https://frontend-api.pump.fun/coins';
 require('dotenv').config();
 
 const getSplTokenList = async (address) => {
@@ -33,14 +39,23 @@ const getSplTokenList = async (address) => {
 //@address spl token address
 //get spl token price
 
+const getSolPrice = async () => {
+  const response = await Moralis.SolApi.token.getTokenPrice({
+    network: 'mainnet',
+    address: 'So11111111111111111111111111111111111111112',
+  });
+
+  return response.raw.usdPrice;
+};
+
 const getSplTokenPrice = async (address) => {
-  console.log('fetching spl token price');
+  // console.log('fetching spl token price ',address);
 
   try {
     const response = await axios.get(
       `https://price.jup.ag/v6/price?ids=${address}`
     );
-    console.log(response.data.data);
+    // console.log(response.data.data);
     if (!response.data.data[address]) {
       try {
         const response1 = await Moralis.SolApi.token.getTokenPrice({
@@ -50,23 +65,108 @@ const getSplTokenPrice = async (address) => {
 
         const price = response1.raw;
 
-        console.log(price);
+        // console.log(price);
 
-        return { price: price.usdPrice };
+        return { price: price.usdPrice, pf: 'rs' };
       } catch (error) {
-        return { error: 'Unregistered spl token address' };
+        try {
+          console.log("fetch price if it's pumpfun spl token");
+          const solPriceinusd = await getSolPrice();
+          console.log(solPriceinusd, `${pfEndpoint}/${address}`);
+          const response_pf = await axios.get(`${pfEndpoint}/${address}`);
+          console.log(response_pf);
+          const pf_splData = response_pf.data;
+
+          return {
+            price:
+              (solPriceinusd / parseFloat(pf_splData.virtual_token_reserves)) *
+              parseFloat(pf_splData.virtual_sol_reserves),
+            pf: 'pf',
+          };
+        } catch (error) {
+          console.error(error);
+          return { error: 'Unregistered spl token address' };
+        }
       }
     } else {
       const price = response.data.data[address].price;
-      console.log(`${address} price in usdc: ${price}`);
-      return { price };
+      return { price, pf: 'js' };
     }
   } catch (error) {
     console.error('Error fetching token price:', error.message);
   }
 };
 
+const createTradeInstruction = async (
+  mint,
+  amount,
+  userPublicKey,
+  slippage = 2,
+  priorityFee = 0.005,
+  pf = 'js'
+) => {
+  const data = {
+    action: 'sell',
+    mint,
+    amount,
+    slippage,
+    priorityFee,
+    denominatedInSol: 'false',
+    publicKey: userPublicKey,
+  };
+
+  try {
+    // pumpfun spl tokens
+    if (pf == 'pf') {
+      const response = await fetch(`https://pumpportal.fun/api/trade-local`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (response.status === 200) {
+        // successfully generated transaction
+        const data = await response.arrayBuffer();
+        const buff = bs58.encode(new Uint8Array(data));
+        return buff;
+      } else {
+        console.log(response.statusText); // log error
+      }
+      return bs58.encode(swapTransactionBuf);
+    }
+    // Jupiter spl tokens
+    else if (pf == 'js' || pf == 'rs') {
+      const quoteResponse = await (
+        await fetch(
+          `https://quote-api.jup.ag/v6/quote?inputMint=${mint}&outputMint=So11111111111111111111111111111111111111112&amount=${amount}&slippageBps=${50}`
+        )
+      ).json();
+
+      // console.log(quoteResponse);
+      const { swapTransaction } = await (
+        await fetch('https://quote-api.jup.ag/v6/swap', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            quoteResponse,
+            userPublicKey,
+            wrapAndUnwrapSol: true,
+          }),
+        })
+      ).json();
+      const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
+      return bs58.encode(swapTransactionBuf);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 module.exports = {
   getSplTokenList,
   getSplTokenPrice,
+  createTradeInstruction,
 };
