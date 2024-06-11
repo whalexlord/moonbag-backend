@@ -46,7 +46,7 @@ const getTokenList = async (owner) => {
 
     tokenList.push({
       ...metaData,
-      amount: parseFloat(token.tokenBalance, 16) / 10 ** metaData.decimals,
+      amount: parseInt(token.tokenBalance, 16) / 10 ** metaData.decimals,
       mint: token.contractAddress,
     });
   }
