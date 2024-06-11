@@ -1,6 +1,8 @@
 const {
   getTokenList,
   getTokenPrice,
+  assembleTransaction,
+  quoteTransaction,
 } = require('../controller/evmController.js');
 const {
   getSplTokenList,
@@ -79,6 +81,23 @@ module.exports = (app) => {
       );
       res.send(tx);
     } catch (err) {
+      console.error(error);
+      res.send(error);
+    }
+  });
+
+  app.get('/sellToken', async (req, res) => {
+    try {
+      const address = req.query.address;
+      const tokens = req.query.tokens.split(',');
+      const amounts = req.query.amounts.split(',');
+
+      console.log(address, tokens, amounts);
+
+      const tx = await assembleTransaction(address, tokens, amounts);
+      console.log(tx);
+      res.status(200).json(tx);
+    } catch (error) {
       console.error(error);
       res.send(error);
     }
