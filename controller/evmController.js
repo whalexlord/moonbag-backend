@@ -68,7 +68,7 @@ const getTokenPrice = async (address) => {
     return price;
   } catch (error) {
     // console.error(error);
-    return { price: 0.001, pf: '' };
+    return { price: 0, pf: '' };
   }
 };
 
