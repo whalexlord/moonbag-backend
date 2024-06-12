@@ -50,7 +50,6 @@ const getSolPrice = async () => {
 
 const getSplTokenPrice = async (address) => {
   // console.log('fetching spl token price ',address);
-
   try {
     const response = await axios.get(
       `https://price.jup.ag/v6/price?ids=${address}`
@@ -65,18 +64,17 @@ const getSplTokenPrice = async (address) => {
 
         const price = response1.raw;
 
-        // console.log(price);
+        console.log('jupiter:   ', price);
 
         return { price: price.usdPrice, pf: 'rs' };
       } catch (error) {
         try {
           console.log("fetch price if it's pumpfun spl token");
-          const solPriceinusd = await getSolPrice();
-          console.log(solPriceinusd, `${pfEndpoint}/${address}`);
           const response_pf = await axios.get(`${pfEndpoint}/${address}`);
-          console.log(response_pf);
-          const pf_splData = response_pf.data;
+          const solPriceinusd = await getSolPrice();
 
+          const pf_splData = response_pf.data;
+          console.log('pumpfun  ', pf_splData);
           return {
             price:
               (solPriceinusd / parseFloat(pf_splData.virtual_token_reserves)) *
@@ -139,7 +137,9 @@ const createTradeInstruction = async (
     else if (pf == 'js' || pf == 'rs') {
       const quoteResponse = await (
         await fetch(
-          `https://quote-api.jup.ag/v6/quote?inputMint=${mint}&outputMint=So11111111111111111111111111111111111111112&amount=${amount}&slippageBps=${50}`
+          `https://quote-api.jup.ag/v6/quote?inputMint=${mint}&outputMint=So11111111111111111111111111111111111111112&amount=${parseInt(
+            amount
+          )}&slippageBps=${50}`
         )
       ).json();
 
@@ -157,6 +157,8 @@ const createTradeInstruction = async (
           }),
         })
       ).json();
+
+      console.log(swapTransaction);
       const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
       return bs58.encode(swapTransactionBuf);
     }
