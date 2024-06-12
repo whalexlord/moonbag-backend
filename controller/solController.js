@@ -83,7 +83,7 @@ const getSplTokenPrice = async (address) => {
           };
         } catch (error) {
           console.error(error);
-          return { error: 'Unregistered spl token address' };
+          return { price: 0, pf: 'js' };
         }
       }
     } else {
@@ -92,6 +92,7 @@ const getSplTokenPrice = async (address) => {
     }
   } catch (error) {
     console.error('Error fetching token price:', error.message);
+    return { price: 0, pf: 'js' };
   }
 };
 
