@@ -3,11 +3,13 @@ const {
   getTokenPrice,
   assembleTransaction,
   quoteTransaction,
+  getNativePrice,
 } = require('../controller/evmController.js');
 const {
   getSplTokenList,
   getSplTokenPrice,
   createTradeInstruction,
+  getSolPrice,
 } = require('../controller/solController.js');
 const { runServer } = require('../const.js');
 
@@ -48,7 +50,9 @@ module.exports = (app) => {
       switch (chain?.toString().toLowerCase()) {
         case 'sol' || 'solana':
           console.log('fetching spl token price');
-          res.status(200).json(await getSplTokenPrice(tokenAddress));
+          const r=await getSplTokenPrice(tokenAddress);
+          console.log(r.price);
+          res.status(200).json(r);
           break;
         case 'eth' || 'ethereum':
           console.log('fetching token price on EVM');
@@ -56,6 +60,22 @@ module.exports = (app) => {
           break;
         default:
           res.send('Invalid chain');
+      }
+    } catch (error) {
+      res.send(error);
+    }
+  });
+
+  app.get('/getBalance', async (req, res) => {
+    try {
+      const chain = req.query.chain;
+      switch (chain?.toString().toLowerCase()) {
+        case 'sol' || 'solana':
+          res.status(200).json(await getSolPrice());
+          break;
+        case 'eth' || 'ethereum':
+          res.status(200).json(getNativePrice());
+          break;
       }
     } catch (error) {
       res.send(error);

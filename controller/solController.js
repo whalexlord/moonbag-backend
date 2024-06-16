@@ -6,18 +6,17 @@ const fetch = require('cross-fetch');
 
 const url = 'https://pumpportal.fun/api/trade-local';
 const pfEndpoint = 'https://frontend-api.pump.fun/coins';
+
 require('dotenv').config();
 
 const getSplTokenList = async (address) => {
   try {
-    console.log(address);
     const response = await Moralis.SolApi.account.getBalance({
       network: 'mainnet',
       address,
     });
 
     const sol_data = response.raw;
-    console.log(sol_data);
 
     const response_spl = await Moralis.SolApi.account.getSPL({
       network: 'mainnet',
@@ -27,9 +26,8 @@ const getSplTokenList = async (address) => {
     const spl_data = response_spl.raw;
 
     const tokenList = [...spl_data];
-    console.log(tokenList);
 
-    return tokenList;
+    return { tokens: tokenList, native: sol_data };
   } catch (error) {
     console.log(error);
     return error;
@@ -45,7 +43,7 @@ const getSolPrice = async () => {
     address: 'So11111111111111111111111111111111111111112',
   });
 
-  return response.raw.usdPrice;
+  return { inUsd: response.raw.usdPrice };
 };
 
 const getSplTokenPrice = async (address) => {
@@ -64,20 +62,18 @@ const getSplTokenPrice = async (address) => {
 
         const price = response1.raw;
 
-        console.log('jupiter:   ', price);
-
         return { price: price.usdPrice, pf: 'rs' };
       } catch (error) {
         try {
-          console.log("fetch price if it's pumpfun spl token");
           const response_pf = await axios.get(`${pfEndpoint}/${address}`);
           const solPriceinusd = await getSolPrice();
 
           const pf_splData = response_pf.data;
-          console.log('pumpfun  ', pf_splData);
+          console.log(solPriceinusd, pf_splData);
+
           return {
             price:
-              (solPriceinusd / parseFloat(pf_splData.virtual_token_reserves)) *
+              (solPriceinusd.inUsd / parseFloat(pf_splData.virtual_token_reserves)) *
               parseFloat(pf_splData.virtual_sol_reserves),
             pf: 'pf',
           };
@@ -91,7 +87,6 @@ const getSplTokenPrice = async (address) => {
       return { price, pf: 'js' };
     }
   } catch (error) {
-    console.error('Error fetching token price:', error.message);
     return { price: 0, pf: 'js' };
   }
 };
@@ -172,4 +167,5 @@ module.exports = {
   getSplTokenList,
   getSplTokenPrice,
   createTradeInstruction,
+  getSolPrice,
 };

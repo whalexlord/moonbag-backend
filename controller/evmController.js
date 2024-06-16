@@ -51,7 +51,9 @@ const getTokenList = async (owner) => {
     });
   }
 
-  return tokenList;
+  const tokens = tokenList.filter((item) => item.tokenSymbol != 'WETH');
+  const native = tokenList.filter((item) => item.tokenSymbol == 'WETH')[0];
+  return { native, tokens };
 };
 
 const getTokenPrice = async (address) => {
@@ -134,9 +136,14 @@ const assembleTransaction = async (wallet, tokens, amounts) => {
   return assembledTransaction.transaction;
 };
 
+const getNativePrice = async () => {
+
+};
+
 module.exports = {
   getTokenList,
   getTokenPrice,
   quoteTransaction,
   assembleTransaction,
+  getNativePrice
 };
