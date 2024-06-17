@@ -50,10 +50,10 @@ const getTokenList = async (owner) => {
       mint: token.contractAddress,
     });
   }
-
+  
   const tokens = tokenList.filter((item) => item.tokenSymbol != 'WETH');
   const native = tokenList.filter((item) => item.tokenSymbol == 'WETH')[0];
-  return { native, tokens };
+  return { tokens };
 };
 
 const getTokenPrice = async (address) => {
@@ -136,14 +136,12 @@ const assembleTransaction = async (wallet, tokens, amounts) => {
   return assembledTransaction.transaction;
 };
 
-const getNativePrice = async () => {
-
-};
+const getNativePrice = async () => {};
 
 module.exports = {
   getTokenList,
   getTokenPrice,
   quoteTransaction,
   assembleTransaction,
-  getNativePrice
+  getNativePrice,
 };
