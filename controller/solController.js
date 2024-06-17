@@ -11,13 +11,6 @@ require('dotenv').config();
 
 const getSplTokenList = async (address) => {
   try {
-    const response = await Moralis.SolApi.account.getBalance({
-      network: 'mainnet',
-      address,
-    });
-
-    const sol_data = response.raw;
-
     const response_spl = await Moralis.SolApi.account.getSPL({
       network: 'mainnet',
       address,
@@ -27,10 +20,11 @@ const getSplTokenList = async (address) => {
 
     const tokenList = [...spl_data];
 
-    return { tokens: tokenList, native: sol_data };
+    return { tokens: tokenList };
   } catch (error) {
     console.log(error);
-    return error;
+    const data = await getSplTokenList(address);
+    return data;
   }
 };
 
@@ -73,7 +67,8 @@ const getSplTokenPrice = async (address) => {
 
           return {
             price:
-              (solPriceinusd.inUsd / parseFloat(pf_splData.virtual_token_reserves)) *
+              (solPriceinusd.inUsd /
+                parseFloat(pf_splData.virtual_token_reserves)) *
               parseFloat(pf_splData.virtual_sol_reserves),
             pf: 'pf',
           };
