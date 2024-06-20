@@ -134,7 +134,7 @@ const createTradeInstruction = async (
         )
       ).json();
 
-      // console.log(quoteResponse);
+      console.log(quoteResponse);
       const { swapTransaction } = await (
         await fetch('https://quote-api.jup.ag/v6/swap', {
           method: 'POST',
@@ -149,7 +149,7 @@ const createTradeInstruction = async (
         })
       ).json();
 
-      console.log(swapTransaction);
+      // console.log(swapTransaction);
       const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
       return bs58.encode(swapTransactionBuf);
     }
