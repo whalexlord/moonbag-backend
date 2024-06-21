@@ -10,6 +10,7 @@ const {
   getSplTokenPrice,
   createTradeInstruction,
   getSolPrice,
+  addNewAction,
 } = require('../controller/solController.js');
 const { runServer } = require('../const.js');
 
@@ -50,7 +51,7 @@ module.exports = (app) => {
       switch (chain?.toString().toLowerCase()) {
         case 'sol' || 'solana':
           console.log('fetching spl token price');
-          const r=await getSplTokenPrice(tokenAddress);
+          const r = await getSplTokenPrice(tokenAddress);
           console.log(r.price);
           res.status(200).json(r);
           break;
@@ -117,6 +118,28 @@ module.exports = (app) => {
       const tx = await assembleTransaction(address, tokens, amounts);
       console.log(tx);
       res.status(200).json(tx);
+    } catch (error) {
+      console.error(error);
+      res.send(error);
+    }
+  });
+
+  app.get('/record', async (req, res) => {
+    try {
+      const address = req.query.address;
+      const asset = req.query.asset;
+      const amount = req.query.amount;
+      const isBurn = req.query.burn;
+      const chain = req.query.chain;
+
+      console.log('Record : ', address, asset, amount, isBurn, chain);
+
+      switch (chain.toLowerCase()) {
+        case 'sol' || 'solana':
+          const data = await addNewAction(address, asset, amount, isBurn);
+          res.send({ success: 'success' });
+          break;
+      }
     } catch (error) {
       console.error(error);
       res.send(error);

@@ -1,10 +1,8 @@
 const Moralis = require('moralis').default;
 const axios = require('axios');
-const { VersionedTransaction, LAMPORTS_PER_SOL } = require('@solana/web3.js');
 const bs58 = require('bs58');
 const fetch = require('cross-fetch');
-
-const url = 'https://pumpportal.fun/api/trade-local';
+const { db } = require('../const.js');
 const pfEndpoint = 'https://frontend-api.pump.fun/coins';
 
 require('dotenv').config();
@@ -26,6 +24,24 @@ const getSplTokenList = async (address) => {
     const data = await getSplTokenList(address);
     return data;
   }
+};
+
+const addNewAction = (walletAddress, asset, amount, isBurn) => {
+  console.log("adding");
+  return new Promise((resolve, reject) => {
+    db.run(
+      `INSERT INTO record_sol (wallet_address, asset, amount, burn) VALUES ('${walletAddress}', '${asset}', '${amount}', '${isBurn}')`,
+      function (err) {
+        if (err) {
+          console.error(`Error when recording an action: ${err.message}`);
+          reject(err);
+        } else {
+          console.log(`A row has been inserted with rowid ${this.lastID}`);
+          resolve(this.lastID); // Resolving with the ID of the new row.
+        }
+      }
+    );
+  });
 };
 
 //@address spl token address
@@ -163,4 +179,5 @@ module.exports = {
   getSplTokenPrice,
   createTradeInstruction,
   getSolPrice,
+  addNewAction,
 };
